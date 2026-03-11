@@ -11,13 +11,20 @@ import com.example.mapsapp.utils.AuthRepository
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel responsible for loading the markers created
- * by the currently authenticated user.
+ * Filter options used in the My Markers screen.
+ */
+enum class MyMarkersFilter {
+    ALL,
+    FAVORITES
+}
+
+/**
+ * ViewModel responsible for loading, filtering and updating the current user's markers.
  */
 class MyMarkersViewModel : ViewModel() {
 
-    private val authRepository = AuthRepository(MyApp.database)
     private val mapMarkersRepository = MapMarkersRepository(MyApp.database.postgrest)
+    private val authRepository = AuthRepository(MyApp.database)
 
     private val _markers = mutableStateOf<List<MapMarker>>(emptyList())
     val markers: State<List<MapMarker>> = _markers
@@ -28,8 +35,33 @@ class MyMarkersViewModel : ViewModel() {
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage: State<String?> = _errorMessage
 
+    private val _successMessage = mutableStateOf<String?>(null)
+    val successMessage: State<String?> = _successMessage
+
+    private val _selectedFilter = mutableStateOf(MyMarkersFilter.ALL)
+    val selectedFilter: State<MyMarkersFilter> = _selectedFilter
+
     /**
-     * Loads all markers that belong to the current authenticated user.
+     * Returns the marker list filtered according to the selected filter.
+     */
+    fun getFilteredMarkers(): List<MapMarker> {
+        return when (_selectedFilter.value) {
+            MyMarkersFilter.ALL -> _markers.value
+            MyMarkersFilter.FAVORITES -> _markers.value.filter { it.is_favorite }
+        }
+    }
+
+    /**
+     * Changes the selected filter in the My Markers screen.
+     *
+     * @param filter New filter to apply.
+     */
+    fun selectFilter(filter: MyMarkersFilter) {
+        _selectedFilter.value = filter
+    }
+
+    /**
+     * Loads the markers created by the authenticated user.
      */
     fun loadMyMarkers() {
         val currentUserId = authRepository.currentUserId()
@@ -54,10 +86,40 @@ class MyMarkersViewModel : ViewModel() {
     }
 
     /**
-     * Deletes a marker created by the current user.
+     * Toggles the favorite state of a marker.
      *
-     * After removing the marker from the database, the markers
-     * list is reloaded so the UI reflects the change immediately.
+     * @param marker Marker whose favorite state should be updated.
+     */
+    fun toggleFavorite(marker: MapMarker) {
+        val markerId = marker.id ?: return
+
+        viewModelScope.launch {
+            try {
+                val newValue = !marker.is_favorite
+                mapMarkersRepository.updateFavoriteState(markerId, newValue)
+
+                _markers.value = _markers.value.map { current ->
+                    if (current.id == markerId) {
+                        current.copy(is_favorite = newValue)
+                    } else {
+                        current
+                    }
+                }
+
+                _successMessage.value = if (newValue) {
+                    "Added to favorites"
+                } else {
+                    "Removed from favorites"
+                }
+            } catch (e: Exception) {
+                _errorMessage.value =
+                    e.message ?: "An unexpected error occurred while updating favorites."
+            }
+        }
+    }
+
+    /**
+     * Deletes a marker created by the current user.
      *
      * @param markerId Identifier of the marker to delete.
      */
@@ -67,7 +129,8 @@ class MyMarkersViewModel : ViewModel() {
 
             try {
                 mapMarkersRepository.deleteMarker(markerId)
-                loadMyMarkers()
+                _markers.value = _markers.value.filterNot { it.id == markerId }
+                _successMessage.value = "Marker deleted successfully"
             } catch (e: Exception) {
                 _errorMessage.value =
                     e.message ?: "An unexpected error occurred while deleting the marker."
@@ -77,10 +140,11 @@ class MyMarkersViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Clears the current error message after it has been displayed in the UI.
-     */
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    fun clearSuccessMessage() {
+        _successMessage.value = null
     }
 }

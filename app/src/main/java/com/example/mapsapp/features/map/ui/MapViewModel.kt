@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
  * - map permission state
  * - marker loading from Supabase
  * - loading and error UI states related to marker retrieval
- * - marker filtering by title through a search query
+ * - marker filtering by title and description through a search query
  */
 class MapViewModel : ViewModel() {
 
@@ -79,7 +79,7 @@ class MapViewModel : ViewModel() {
      * Returns the list of markers filtered by the current search query.
      *
      * If the search query is blank, the full markers list is returned.
-     * Otherwise, only markers whose title contains the query are returned.
+     * Otherwise, markers are matched against title and description.
      *
      * @return Filtered list of markers to display on the map.
      */
@@ -91,7 +91,8 @@ class MapViewModel : ViewModel() {
         }
 
         return _markers.value.filter { marker ->
-            marker.title.contains(query, ignoreCase = true)
+            marker.title.contains(query, ignoreCase = true) ||
+                    marker.description.contains(query, ignoreCase = true)
         }
     }
 

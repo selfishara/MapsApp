@@ -45,9 +45,6 @@ class MapMarkersRepository(
     /**
      * Inserts a new marker into the database.
      *
-     * This function sends a new marker object to Supabase PostgREST
-     * and stores it in the "posts" table.
-     *
      * @param marker Marker entity that will be stored in the database.
      */
     suspend fun insertMarker(marker: MapMarker) {
@@ -58,9 +55,6 @@ class MapMarkersRepository(
 
     /**
      * Updates the information of an existing marker.
-     *
-     * This function modifies the title, description and image
-     * associated with a marker already stored in the database.
      *
      * @param id Identifier of the marker to update.
      * @param title Updated marker title.
@@ -87,9 +81,28 @@ class MapMarkersRepository(
     }
 
     /**
-     * Deletes a marker from the database.
+     * Updates the favorite state of an existing marker.
      *
-     * The marker is removed from the "posts" table using its identifier.
+     * @param id Identifier of the marker to update.
+     * @param isFavorite New favorite state.
+     */
+    suspend fun updateFavoriteState(
+        id: Long,
+        isFavorite: Boolean
+    ) {
+        postgrest
+            .from("posts")
+            .update({
+                set("is_favorite", isFavorite)
+            }) {
+                filter {
+                    eq("id", id)
+                }
+            }
+    }
+
+    /**
+     * Deletes a marker from the database.
      *
      * @param id Identifier of the marker that will be deleted.
      */

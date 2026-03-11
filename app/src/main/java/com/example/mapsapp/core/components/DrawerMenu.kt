@@ -45,7 +45,7 @@ fun DrawerMenu(
          * Branded header of the drawer.
          */
         Text(
-            text = "📍 PinPoint",
+            text = "📍 YourPoint",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)

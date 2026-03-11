@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,25 +33,12 @@ import coil.compose.AsyncImage
 import com.example.mapsapp.core.navigation.Destination
 import com.example.mapsapp.features.profile.ProfileViewModel
 
-/**
- * Profile screen of the application.
- *
- * This screen allows the user to:
- * - view and edit the visible display name
- * - view the account email
- * - select a new profile image
- * - save the profile in Supabase
- * - navigate to settings
- * - log out from the current session
- *
- * @param navController Navigation controller used to move between screens.
- * @param viewModel ViewModel responsible for profile loading and saving.
- */
 @Composable
 fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel = viewModel()
 ) {
+
     val name by viewModel.name
     val email by viewModel.email
     val avatarUrl by viewModel.avatarUrl
@@ -59,24 +47,15 @@ fun ProfileScreen(
     val saveSuccess by viewModel.saveSuccess
     val errorMessage by viewModel.errorMessage
 
-    /**
-     * Launcher used to select a profile image from the device gallery.
-     */
     val pickImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.setSelectedImageUri(it) }
         }
 
-    /**
-     * Loads the profile once when the screen is first composed.
-     */
     LaunchedEffect(Unit) {
         viewModel.loadProfile()
     }
 
-    /**
-     * Consumes the save success state after the profile is successfully stored.
-     */
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
             viewModel.consumeSaveSuccess()
@@ -109,18 +88,16 @@ fun ProfileScreen(
         )
 
         Text(
-            text = "Manage your account, personalise your visible profile and access your main account actions.",
+            text = "Manage your account and personalise your visible profile.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
         )
 
         Card(
             shape = RoundedCornerShape(22.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
+
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -135,13 +112,21 @@ fun ProfileScreen(
                 val imageModel: Any? = selectedImageUri ?: avatarUrl
 
                 imageModel?.let { model ->
-                    AsyncImage(
-                        model = model,
-                        contentDescription = "Profile image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                    )
+
+                    Card(
+                        shape = RoundedCornerShape(18.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                    ) {
+
+                        AsyncImage(
+                            model = model,
+                            contentDescription = "Profile image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
 
                 OutlinedButton(
@@ -172,8 +157,11 @@ fun ProfileScreen(
                 )
 
                 if (isLoading) {
+
                     CircularProgressIndicator()
+
                 } else {
+
                     Button(
                         onClick = { viewModel.saveProfile() },
                         modifier = Modifier.fillMaxWidth(),
@@ -187,15 +175,14 @@ fun ProfileScreen(
 
         Card(
             shape = RoundedCornerShape(22.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
+
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
                 Text(
                     text = "Quick actions ⚙️",
                     style = MaterialTheme.typography.titleMedium,

@@ -7,33 +7,53 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkGreen,
+    primary = DarkTerracotta,
     onPrimary = DarkBackground,
-    secondary = PalePink,
+
+    secondary = DarkRose,
     onSecondary = DarkBackground,
-    tertiary = SoftSage,
+
+    tertiary = TerracottaSoft,
+    onTertiary = DarkBackground,
+
     background = DarkBackground,
     onBackground = DarkText,
+
     surface = DarkSurface,
-    onSurface = DarkText
+    onSurface = DarkText,
+
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkMutedText,
+
+    outline = DarkMutedText.copy(alpha = 0.35f)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = SageGreen,
+    primary = Terracotta,
     onPrimary = WarmWhite,
-    secondary = PalePink,
-    onSecondary = ForestText,
-    tertiary = SoftSage,
+
+    secondary = RoseMist,
+    onSecondary = CocoaText,
+
+    tertiary = TerracottaSoft,
+    onTertiary = CocoaText,
+
     background = Cream,
-    onBackground = ForestText,
+    onBackground = CocoaText,
+
     surface = WarmWhite,
-    onSurface = ForestText
+    onSurface = CocoaText,
+
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = MutedBrown,
+
+    outline = BorderColor
 )
 
 /**
  * Main application theme.
  *
- * This theme defines the visual identity of the app using a soft,
+ * This theme defines the visual identity of the app using a warm,
  * minimal and map-inspired palette.
  *
  * @param darkTheme Whether dark theme should be used.

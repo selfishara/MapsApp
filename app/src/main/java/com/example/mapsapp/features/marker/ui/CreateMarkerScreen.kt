@@ -70,6 +70,13 @@ fun CreateMarkerScreen(
      */
     LaunchedEffect(creationSuccess) {
         if (creationSuccess) {
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(
+                    com.example.mapsapp.core.navigation.NavigationResultKeys.SNACKBAR_MESSAGE,
+                    "Marker created successfully"
+                )
+
             navController.popBackStack()
             viewModel.consumeCreationSuccess()
         }

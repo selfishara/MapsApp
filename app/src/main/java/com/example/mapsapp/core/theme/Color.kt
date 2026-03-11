@@ -2,19 +2,27 @@ package com.example.mapsapp.core.theme
 
 import androidx.compose.ui.graphics.Color
 
+// -------------------------
 // Light theme
-val SageGreen = Color(0xFF7C9A7A)
-val SoftSage = Color(0xFFDCE8D8)
-val Cream = Color(0xFFFAF7F2)
+// -------------------------
+val Terracotta = Color(0xFFB86B5B)
+val TerracottaSoft = Color(0xFFE8C9C1)
+val Sand = Color(0xFFF4E7DA)
+val Cream = Color(0xFFFBF7F2)
 val WarmWhite = Color(0xFFFFFCF8)
-val ForestText = Color(0xFF2F3E2F)
-val SoftGray = Color(0xFF6B7280)
-val PalePink = Color(0xFFF3E8EC)
-val BorderColor = Color(0xFFE5E7EB)
+val CocoaText = Color(0xFF3F312B)
+val MutedBrown = Color(0xFF7A6A63)
+val RoseMist = Color(0xFFF2E4E1)
+val BorderColor = Color(0xFFE8DDD4)
+val SurfaceVariantLight = Color(0xFFF1E7DE)
 
+// -------------------------
 // Dark theme
-val DarkGreen = Color(0xFF9BC59D)
-val DarkBackground = Color(0xFF1E2520)
-val DarkSurface = Color(0xFF2A332D)
-val DarkText = Color(0xFFF5F5F5)
-val DarkMutedText = Color(0xFFB8C1B8)
+// -------------------------
+val DarkTerracotta = Color(0xFFE0A08F)
+val DarkBackground = Color(0xFF1F1A18)
+val DarkSurface = Color(0xFF2A2421)
+val DarkSurfaceVariant = Color(0xFF3A312D)
+val DarkText = Color(0xFFF7F3EF)
+val DarkMutedText = Color(0xFFD2C5BC)
+val DarkRose = Color(0xFFB8877D)

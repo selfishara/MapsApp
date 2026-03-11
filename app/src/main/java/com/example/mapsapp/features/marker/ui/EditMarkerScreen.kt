@@ -64,6 +64,13 @@ fun EditMarkerScreen(
 
     LaunchedEffect(updateSuccess) {
         if (updateSuccess) {
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(
+                    com.example.mapsapp.core.navigation.NavigationResultKeys.SNACKBAR_MESSAGE,
+                    "Marker updated successfully"
+                )
+
             navController.popBackStack()
             viewModel.consumeUpdateSuccess()
         }
@@ -92,7 +99,7 @@ fun EditMarkerScreen(
     ) {
 
         Text(
-            text = "Edit marker ✏️",
+            text = "Edit marker",
             style = MaterialTheme.typography.titleLarge
         )
 
