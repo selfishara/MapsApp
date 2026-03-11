@@ -9,6 +9,12 @@ import com.example.mapsapp.utils.AuthRepository
 import com.example.mapsapp.utils.AuthResult
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for the user registration flow.
+ *
+ * It stores the registration form state and performs the sign-up action
+ * against Supabase Authentication.
+ */
 class RegisterViewModel : ViewModel() {
 
     private val authRepo = AuthRepository(MyApp.database)
@@ -42,12 +48,22 @@ class RegisterViewModel : ViewModel() {
 
     fun signUp() {
         viewModelScope.launch {
-            _authResult.value = authRepo.register(_email.value, _password.value)
+            _authResult.value = authRepo.register(
+                email = _email.value.trim(),
+                password = _password.value
+            )
 
             if (_authResult.value is AuthResult.Error) {
                 _showError.value = true
             } else {
-                _isLoggedIn.value = true
+                _isLoggedIn.value = authRepo.isLoggedIn()
+
+                if (!_isLoggedIn.value) {
+                    _authResult.value = AuthResult.Error(
+                        "Registration succeeded but no active session was created. You may need to confirm the email before logging in."
+                    )
+                    _showError.value = true
+                }
             }
         }
     }

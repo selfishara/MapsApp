@@ -4,7 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -13,10 +16,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapsapp.features.auth.RegisterViewModel
 import com.example.mapsapp.utils.AuthResult
 
+/**
+ * Registration screen.
+ *
+ * Allows the user to create a new account using email and password.
+ *
+ * @param onRegisterSuccess Called when registration succeeds.
+ * @param navigateToLogin Navigates back to the login screen.
+ */
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
@@ -36,11 +49,11 @@ fun RegisterScreen(
     if (showError) {
         val errorMessage = (authResult as AuthResult.Error).message
 
-        if (errorMessage.contains("user_already_exists")) {
-            Toast.makeText(context, "User already exists", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(context, "An error has ocurred", Toast.LENGTH_LONG).show()
-        }
+        Toast.makeText(
+            context,
+            errorMessage.ifBlank { "An error has occurred" },
+            Toast.LENGTH_LONG
+        ).show()
 
         viewModel.errorMessageShowed()
     }
@@ -48,6 +61,15 @@ fun RegisterScreen(
     RegisterForm(viewModel, navigateToLogin)
 }
 
+/**
+ * Registration form UI.
+ *
+ * Displays email and password input fields and provides
+ * actions to register or navigate back to the login screen.
+ *
+ * @param viewModel ViewModel that manages the register state.
+ * @param navigateToLogin Callback used to navigate to the login screen.
+ */
 @Composable
 fun RegisterForm(
     viewModel: RegisterViewModel,
@@ -55,29 +77,45 @@ fun RegisterForm(
 ) {
     val email by viewModel.email
     val password by viewModel.password
+    val isLoggedIn by viewModel.isLoggedIn
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         TextField(
             value = email,
             onValueChange = { viewModel.editEmail(it) },
-            label = { Text("Email") }
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         TextField(
             value = password,
             onValueChange = { viewModel.editPassword(it) },
-            label = { Text("Password") }
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
         )
 
-        Button(onClick = { viewModel.signUp() }) {
-            Text("Register")
+        if (!isLoggedIn) {
+            Button(
+                onClick = { viewModel.signUp() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Register")
+            }
+        } else {
+            CircularProgressIndicator()
         }
 
-        Button(onClick = navigateToLogin) {
+        Button(
+            onClick = navigateToLogin,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Back to login")
         }
     }

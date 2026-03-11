@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,10 +37,14 @@ import com.example.mapsapp.utils.FileUtils
  * - create a marker in Supabase Database
  *
  * @param viewModel ViewModel responsible for the marker creation flow.
+ * @param latitude Latitude received from the selected point on the map.
+ * @param longitude Longitude received from the selected point on the map.
  */
 @Composable
 fun CreateMarkerContent(
-    viewModel: CreateMarkerViewModel
+    viewModel: CreateMarkerViewModel,
+    latitude: Double,
+    longitude: Double
 ) {
     val context = LocalContext.current
 
@@ -48,8 +53,6 @@ fun CreateMarkerContent(
     val imageUri by viewModel.imageUri
     val showDialog by viewModel.showDialog
     val isLoading by viewModel.isLoading
-    val latitude by viewModel.latitude
-    val longitude by viewModel.longitude
     val errorMessage by viewModel.errorMessage
 
     val takePictureLauncher =
@@ -87,11 +90,7 @@ fun CreateMarkerContent(
 
         Text("Create marker")
 
-        latitude?.let { lat ->
-            longitude?.let { lng ->
-                Text("Coordinates: $lat, $lng")
-            }
-        }
+        Text("Coordinates: $latitude, $longitude")
 
         TextField(
             value = title,
@@ -131,9 +130,10 @@ fun CreateMarkerContent(
         } else {
             Button(
                 onClick = {
-                    viewModel.createMarker()
+                    viewModel.createMarker(latitude, longitude)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Text("Save marker")
             }

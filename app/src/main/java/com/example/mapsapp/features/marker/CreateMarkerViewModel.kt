@@ -11,6 +11,7 @@ import com.example.mapsapp.core.permissions.PermissionStatus
 import com.example.mapsapp.data.model.MapMarker
 import com.example.mapsapp.data.remote.MapMarkersRepository
 import com.example.mapsapp.data.remote.StorageRepository
+import com.example.mapsapp.utils.AuthRepository
 import kotlinx.coroutines.launch
 
 /**
@@ -27,6 +28,7 @@ class CreateMarkerViewModel(application: Application) : AndroidViewModel(applica
 
     private val mapMarkersRepository = MapMarkersRepository(MyApp.database.postgrest)
     private val storageRepository = StorageRepository(MyApp.database.storage)
+    private val authRepository = AuthRepository(MyApp.database)
 
     // -------------------------
     // PERMISOS (lo que ya tenías)
@@ -83,23 +85,12 @@ class CreateMarkerViewModel(application: Application) : AndroidViewModel(applica
     private val _description = mutableStateOf("")
     val description: State<String> = _description
 
-    private val _latitude = mutableStateOf<Double?>(null)
-    val latitude: State<Double?> = _latitude
-
-    private val _longitude = mutableStateOf<Double?>(null)
-    val longitude: State<Double?> = _longitude
-
     fun editTitle(value: String) {
         _title.value = value
     }
 
     fun editDescription(value: String) {
         _description.value = value
-    }
-
-    fun setCoordinates(latitude: Double, longitude: Double) {
-        _latitude.value = latitude
-        _longitude.value = longitude
     }
 
     // -------------------------
@@ -131,14 +122,12 @@ class CreateMarkerViewModel(application: Application) : AndroidViewModel(applica
      * If an image has been selected, it is first uploaded to Storage and its
      * public URL is then stored in the database together with the marker data.
      *
-     * @param userId Optional authenticated user id. It can be passed later
-     * from the auth flow when everything is connected.
+     * @param latitude Latitude received from the selected point on the map.
+     * @param longitude Longitude received from the selected point on the map.
      */
-    fun createMarker(userId: String? = null) {
+    fun createMarker(latitude: Double, longitude: Double) {
         val currentTitle = _title.value.trim()
         val currentDescription = _description.value.trim()
-        val currentLatitude = _latitude.value
-        val currentLongitude = _longitude.value
 
         if (currentTitle.isBlank()) {
             _errorMessage.value = "Title cannot be empty."
@@ -150,8 +139,10 @@ class CreateMarkerViewModel(application: Application) : AndroidViewModel(applica
             return
         }
 
-        if (currentLatitude == null || currentLongitude == null) {
-            _errorMessage.value = "Marker coordinates are missing."
+        val currentUserId = authRepository.currentUserId()
+
+        if (currentUserId == null) {
+            _errorMessage.value = "No authenticated user found."
             return
         }
 
@@ -172,16 +163,17 @@ class CreateMarkerViewModel(application: Application) : AndroidViewModel(applica
                 val marker = MapMarker(
                     title = currentTitle,
                     description = currentDescription,
-                    latitude = currentLatitude,
-                    longitude = currentLongitude,
+                    latitude = latitude,
+                    longitude = longitude,
                     image_url = uploadedImageUrl,
-                    user_id = userId
+                    user_id = currentUserId
                 )
 
                 mapMarkersRepository.insertMarker(marker)
                 _creationSuccess.value = true
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "An unexpected error occurred while creating the marker."
+                _errorMessage.value =
+                    e.message ?: "An unexpected error occurred while creating the marker."
             } finally {
                 _isLoading.value = false
             }

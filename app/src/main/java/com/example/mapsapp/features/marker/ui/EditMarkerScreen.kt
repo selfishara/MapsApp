@@ -28,50 +28,44 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.mapsapp.features.marker.CreateMarkerViewModel
+import com.example.mapsapp.features.marker.EditMarkerViewModel
 
 /**
- * Screen used to create a new map marker.
+ * Screen used to edit an existing marker.
  *
- * The user can:
- * - add title
- * - add description
- * - upload image
- * - save marker in database
+ * The user can update title, description and image.
  *
- * @param navController Navigation controller used to return to the map.
- * @param latitude Latitude received from the map long press.
- * @param longitude Longitude received from the map long press.
- * @param viewModel ViewModel responsible for marker creation.
+ * @param navController Navigation controller used to return to the previous screen.
+ * @param markerId Identifier of the marker being edited.
+ * @param viewModel ViewModel responsible for marker editing.
  */
 @Composable
-fun CreateMarkerScreen(
+fun EditMarkerScreen(
     navController: NavController,
-    latitude: Double,
-    longitude: Double,
-    viewModel: CreateMarkerViewModel = viewModel()
+    markerId: Long,
+    viewModel: EditMarkerViewModel = viewModel()
 ) {
-
     val title by viewModel.title
     val description by viewModel.description
     val imageUri by viewModel.imageUri
+    val existingImageUrl by viewModel.existingImageUrl
     val isLoading by viewModel.isLoading
+    val updateSuccess by viewModel.updateSuccess
     val errorMessage by viewModel.errorMessage
-    val creationSuccess by viewModel.creationSuccess
 
     val pickImageLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.setImageUri(it) }
         }
 
-    /**
-     * When marker creation is completed successfully, return to the previous
-     * screen and consume the success state so it is not triggered again.
-     */
-    LaunchedEffect(creationSuccess) {
-        if (creationSuccess) {
+    LaunchedEffect(Unit) {
+        viewModel.loadMarker(markerId)
+    }
+
+    LaunchedEffect(updateSuccess) {
+        if (updateSuccess) {
             navController.popBackStack()
-            viewModel.consumeCreationSuccess()
+            viewModel.consumeUpdateSuccess()
         }
     }
 
@@ -88,6 +82,8 @@ fun CreateMarkerScreen(
         )
     }
 
+    val imageModel = imageUri ?: existingImageUrl
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -96,39 +92,28 @@ fun CreateMarkerScreen(
     ) {
 
         Text(
-            text = "Create marker 📍",
+            text = "Edit marker ✏️",
             style = MaterialTheme.typography.titleLarge
         )
 
         Text(
-            text = "Save a place on the map and add your own notes.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
-        )
-
-        Text(
-            text = "LAT: $latitude",
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        Text(
-            text = "LONG: $longitude",
-            style = MaterialTheme.typography.bodySmall
+            text = "Update your marker information and keep your saved places organised.",
+            style = MaterialTheme.typography.bodyMedium
         )
 
         Card(
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                imageUri?.let {
+                imageModel?.let { model ->
                     AsyncImage(
-                        model = it,
+                        model = model,
                         contentDescription = "Marker image",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -140,7 +125,7 @@ fun CreateMarkerScreen(
                     onClick = { pickImageLauncher.launch("image/*") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Select image")
+                    Text("Change image")
                 }
             }
         }
@@ -164,19 +149,14 @@ fun CreateMarkerScreen(
         )
 
         if (isLoading) {
-
             CircularProgressIndicator()
-
         } else {
-
             Button(
-                onClick = {
-                    viewModel.createMarker(latitude, longitude)
-                },
+                onClick = { viewModel.updateMarker(markerId) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Save marker")
+                Text("Save changes")
             }
         }
     }

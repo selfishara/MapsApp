@@ -9,6 +9,12 @@ import com.example.mapsapp.utils.AuthRepository
 import com.example.mapsapp.utils.AuthResult
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for the login flow.
+ *
+ * It stores the login form state, checks whether there is an existing
+ * Supabase session and performs the sign-in action.
+ */
 class LoginViewModel : ViewModel() {
 
     private val authRepo = AuthRepository(MyApp.database)
@@ -48,12 +54,20 @@ class LoginViewModel : ViewModel() {
 
     fun signIn() {
         viewModelScope.launch {
-            _authResult.value = authRepo.login(_email.value, _password.value)
+            _authResult.value = authRepo.login(
+                email = _email.value.trim(),
+                password = _password.value
+            )
 
             if (_authResult.value is AuthResult.Error) {
                 _showError.value = true
             } else {
-                _isLoggedIn.value = true
+                _isLoggedIn.value = authRepo.isLoggedIn()
+
+                if (!_isLoggedIn.value) {
+                    _authResult.value = AuthResult.Error("No active session after login.")
+                    _showError.value = true
+                }
             }
         }
     }

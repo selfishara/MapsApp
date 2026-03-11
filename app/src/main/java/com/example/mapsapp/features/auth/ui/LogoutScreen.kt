@@ -16,6 +16,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapsapp.features.auth.LogoutViewModel
 import com.example.mapsapp.utils.AuthResult
 
+/**
+ * Screen responsible for closing the user session.
+ *
+ * It displays a loading indicator while the logout operation
+ * is performed and navigates back to the login screen when finished.
+ *
+ * @param navigateToHome Callback executed when logout finishes.
+ */
 @Composable
 fun LogoutScreen(navigateToHome: () -> Unit) {
     val context = LocalContext.current
@@ -25,13 +33,23 @@ fun LogoutScreen(navigateToHome: () -> Unit) {
     val showError by viewModel.showError
     val authResult by viewModel.authResult
 
+    /**
+     * Navigates to login when logout completes.
+     */
     LaunchedEffect(loggedOut) {
         if (loggedOut) navigateToHome()
     }
 
+    /**
+     * Displays logout errors.
+     */
     if (showError) {
         val errorMessage = (authResult as AuthResult.Error).message
-        Toast.makeText(context, errorMessage.ifBlank { "An error has ocurred" }, Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            context,
+            errorMessage.ifBlank { "An error has occurred" },
+            Toast.LENGTH_LONG
+        ).show()
         viewModel.errorMessageShowed()
     }
 
@@ -41,6 +59,6 @@ fun LogoutScreen(navigateToHome: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator()
-        Text("Loging out…")
+        Text("Logging out…")
     }
 }

@@ -26,11 +26,12 @@ class MapMarkersRepository(
     }
 
     /**
-     * Returns a single map marker by id.
+     * Retrieves a marker from the database using its identifier.
      *
-     * @param id Marker identifier.
+     * @param id Identifier of the marker to retrieve.
+     * @return Marker entity stored in Supabase.
      */
-    suspend fun getMarker(id: String): MapMarker {
+    suspend fun getMarkerById(id: Long): MapMarker {
         return postgrest
             .from("posts")
             .select {
@@ -38,13 +39,16 @@ class MapMarkersRepository(
                     eq("id", id)
                 }
             }
-            .decodeSingle<MapMarker>()
+            .decodeSingle()
     }
 
     /**
-     * Inserts a new marker into the posts table.
+     * Inserts a new marker into the database.
      *
-     * @param marker Marker to insert.
+     * This function sends a new marker object to Supabase PostgREST
+     * and stores it in the "posts" table.
+     *
+     * @param marker Marker entity that will be stored in the database.
      */
     suspend fun insertMarker(marker: MapMarker) {
         postgrest
@@ -53,31 +57,28 @@ class MapMarkersRepository(
     }
 
     /**
-     * Updates an existing marker.
+     * Updates the information of an existing marker.
      *
-     * @param id Marker identifier.
-     * @param title Updated title.
-     * @param description Updated description.
-     * @param latitude Updated latitude.
-     * @param longitude Updated longitude.
-     * @param image_url Optional public image URL.
+     * This function modifies the title, description and image
+     * associated with a marker already stored in the database.
+     *
+     * @param id Identifier of the marker to update.
+     * @param title Updated marker title.
+     * @param description Updated marker description.
+     * @param imageUrl Optional updated image URL stored in Supabase Storage.
      */
     suspend fun updateMarker(
-        id: String,
+        id: Long,
         title: String,
         description: String,
-        latitude: Double,
-        longitude: Double,
-        image_url: String?
+        imageUrl: String?
     ) {
         postgrest
             .from("posts")
             .update({
                 set("title", title)
                 set("description", description)
-                set("latitude", latitude)
-                set("longitude", longitude)
-                set("image_url", image_url)
+                set("image_url", imageUrl)
             }) {
                 filter {
                     eq("id", id)
@@ -86,11 +87,13 @@ class MapMarkersRepository(
     }
 
     /**
-     * Deletes a marker by id.
+     * Deletes a marker from the database.
      *
-     * @param id Marker identifier.
+     * The marker is removed from the "posts" table using its identifier.
+     *
+     * @param id Identifier of the marker that will be deleted.
      */
-    suspend fun deleteMarker(id: String) {
+    suspend fun deleteMarker(id: Long) {
         postgrest
             .from("posts")
             .delete {
@@ -98,5 +101,22 @@ class MapMarkersRepository(
                     eq("id", id)
                 }
             }
+    }
+
+    /**
+     * Returns all markers created by a specific user.
+     *
+     * @param userId Authenticated user identifier.
+     * @return List of markers belonging to that user.
+     */
+    suspend fun getMarkersByUserId(userId: String): List<MapMarker> {
+        return postgrest
+            .from("posts")
+            .select {
+                filter {
+                    eq("user_id", userId)
+                }
+            }
+            .decodeList<MapMarker>()
     }
 }

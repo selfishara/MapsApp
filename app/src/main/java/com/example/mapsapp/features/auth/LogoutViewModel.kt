@@ -9,6 +9,12 @@ import com.example.mapsapp.utils.AuthRepository
 import com.example.mapsapp.utils.AuthResult
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for logging the current user out.
+ *
+ * The logout action is triggered as soon as this ViewModel is created.
+ * The UI observes [loggedOut] to navigate back to the login screen.
+ */
 class LogoutViewModel : ViewModel() {
 
     private val authRepo = AuthRepository(MyApp.database)
@@ -26,6 +32,12 @@ class LogoutViewModel : ViewModel() {
         logout()
     }
 
+    /**
+     * Closes the current authenticated session.
+     *
+     * On success, [loggedOut] becomes true.
+     * On failure, the UI is notified through [showError].
+     */
     fun logout() {
         viewModelScope.launch {
             val result = authRepo.logout()
@@ -39,6 +51,9 @@ class LogoutViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Hides the current error message after it has been shown in the UI.
+     */
     fun errorMessageShowed() {
         _showError.value = false
     }
