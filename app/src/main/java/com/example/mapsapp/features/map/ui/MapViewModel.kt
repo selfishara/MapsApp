@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
  * - map permission state
  * - marker loading from Supabase
  * - loading and error UI states related to marker retrieval
+ * - marker filtering by title through a search query
  */
 class MapViewModel : ViewModel() {
 
@@ -34,6 +35,9 @@ class MapViewModel : ViewModel() {
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage: State<String?> = _errorMessage
 
+    private val _searchQuery = mutableStateOf("")
+    val searchQuery: State<String> = _searchQuery
+
     fun onPermissionResult(status: PermissionStatus) {
         _uiState.value = when (status) {
             PermissionStatus.Granted -> MapPermissionState.NavigateToMap
@@ -41,6 +45,15 @@ class MapViewModel : ViewModel() {
             PermissionStatus.PermanentlyDenied -> MapPermissionState.ShowPermanentlyDenied
             PermissionStatus.Unknown -> MapPermissionState.Requesting
         }
+    }
+
+    /**
+     * Updates the current marker search query.
+     *
+     * @param value Text entered by the user in the search field.
+     */
+    fun editSearchQuery(value: String) {
+        _searchQuery.value = value
     }
 
     /**
@@ -54,10 +67,31 @@ class MapViewModel : ViewModel() {
             try {
                 _markers.value = mapMarkersRepository.getAllMarkers()
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "An unexpected error occurred while loading markers."
+                _errorMessage.value =
+                    e.message ?: "An unexpected error occurred while loading markers."
             } finally {
                 _isLoadingMarkers.value = false
             }
+        }
+    }
+
+    /**
+     * Returns the list of markers filtered by the current search query.
+     *
+     * If the search query is blank, the full markers list is returned.
+     * Otherwise, only markers whose title contains the query are returned.
+     *
+     * @return Filtered list of markers to display on the map.
+     */
+    fun getFilteredMarkers(): List<MapMarker> {
+        val query = _searchQuery.value.trim()
+
+        if (query.isBlank()) {
+            return _markers.value
+        }
+
+        return _markers.value.filter { marker ->
+            marker.title.contains(query, ignoreCase = true)
         }
     }
 

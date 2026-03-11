@@ -7,17 +7,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mapsapp.core.layout.MainScaffold
+import com.example.mapsapp.core.theme.ThemeViewModel
 import com.example.mapsapp.features.auth.ui.LoginScreen
 import com.example.mapsapp.features.auth.ui.LogoutScreen
 import com.example.mapsapp.features.auth.ui.RegisterScreen
 import com.example.mapsapp.features.map.ui.MapScreen
 import com.example.mapsapp.features.map.ui.screens.AboutScreen
+import com.example.mapsapp.features.map.ui.screens.ProfileScreen
 import com.example.mapsapp.features.map.ui.screens.SettingsScreen
 import com.example.mapsapp.features.marker.ui.CreateMarkerScreen
+import com.example.mapsapp.features.marker.ui.EditMarkerScreen
 import com.example.mapsapp.features.marker.ui.MyMarkersScreen
 import com.example.mapsapp.features.splash.ui.SplashScreen
-import com.example.mapsapp.features.map.ui.screens.ProfileScreen
-import com.example.mapsapp.features.marker.ui.EditMarkerScreen
 
 /**
  * Main navigation host of the application.
@@ -36,19 +37,25 @@ import com.example.mapsapp.features.marker.ui.EditMarkerScreen
  * - Logout → User logout screen
  * - Maps → Main map screen
  * - MyMarkers → User markers screen
+ * - Profile → User profile screen
  * - Settings → App settings screen
  * - About → Information about the application
  * - CreateMarker → Marker creation screen with coordinates
+ * - EditMarker → Marker edition screen
  *
  * The CreateMarker route receives latitude and longitude as
  * navigation arguments when the user performs a long click on the map.
  *
  * @param navController Controller responsible for handling navigation events.
+ * @param themeViewModel ViewModel responsible for theme state handling.
  */
 @Composable
-fun AppNavHost(navController: NavHostController) {
+fun AppNavHost(
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel
+) {
 
-    MainScaffold(navController) {
+    MainScaffold(navController = navController) {
 
         NavHost(
             navController = navController,
@@ -136,29 +143,34 @@ fun AppNavHost(navController: NavHostController) {
              * Main map screen.
              */
             composable(Destination.Maps.route) {
-                MapScreen(navController)
+                MapScreen(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
             }
 
             /**
              * Screen that displays all markers created by the current user.
              */
             composable(Destination.MyMarkers.route) {
-                MyMarkersScreen(navController)
+                MyMarkersScreen(navController = navController)
             }
 
             /**
              * Profile screen.
              */
             composable(Destination.Profile.route) {
-                ProfileScreen(navController)
+                ProfileScreen(navController = navController)
             }
-
 
             /**
              * Settings screen.
              */
             composable(Destination.Settings.route) {
-                SettingsScreen(navController)
+                SettingsScreen(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
             }
 
             /**
@@ -189,13 +201,11 @@ fun AppNavHost(navController: NavHostController) {
                     backStackEntry.arguments?.getString("longitude")?.toDoubleOrNull()
 
                 if (latitude != null && longitude != null) {
-
                     CreateMarkerScreen(
                         navController = navController,
                         latitude = latitude,
                         longitude = longitude
                     )
-
                 } else {
                     /**
                      * Fallback in case arguments are missing.

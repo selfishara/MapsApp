@@ -80,20 +80,18 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.runtime:runtime-livedata")
 
-    // Maps
+// Maps
     implementation("com.google.maps.android:maps-compose:7.0.0")
+    implementation("com.google.maps.android:maps-compose-utils:7.0.0")
     implementation("com.google.android.gms:play-services-maps:19.2.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
+    // Cluster
+    implementation("com.google.maps.android:maps-compose-utils:7.0.0")
     // Images
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    // Supabase
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:auth-kt")
-    implementation("io.github.jan-tennert.supabase:storage-kt")
-    implementation("io.ktor:ktor-client-android:3.1.2")
+// Supabase
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")

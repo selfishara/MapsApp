@@ -11,6 +11,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mapsapp.core.navigation.Destination
+import com.example.mapsapp.core.theme.ThemeViewModel
 
 /**
  * Settings screen of the application.
@@ -25,16 +27,15 @@ import com.example.mapsapp.core.navigation.Destination
  * This screen provides basic configuration and account actions,
  * such as logging out from the current session.
  *
- * In future versions this screen could include:
- * - theme configuration
- * - map preferences
- * - account settings
+ * It also includes the app theme toggle between light and dark mode.
  *
  * @param navController Navigation controller used to move between screens.
+ * @param themeViewModel ViewModel responsible for app theme state.
  */
 @Composable
 fun SettingsScreen(
-    navController: NavController
+    navController: NavController,
+    themeViewModel: ThemeViewModel
 ) {
 
     Column(
@@ -54,6 +55,43 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
         )
+
+        Card(
+            shape = RoundedCornerShape(22.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                Text(
+                    text = "Appearance",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Dark mode",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Switch(
+                        checked = themeViewModel.isDarkMode.value,
+                        onCheckedChange = {
+                            themeViewModel.toggleTheme()
+                        }
+                    )
+                }
+            }
+        }
 
         Card(
             shape = RoundedCornerShape(22.dp),
